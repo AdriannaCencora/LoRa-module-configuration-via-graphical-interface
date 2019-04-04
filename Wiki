@@ -1,5 +1,0 @@
-Documentation for LoRa module E32-868T30D using chip SX1276 (Semtech):
-http://www.ebyte.com/en/downpdf.aspx?id=189
-
-Library used for handling LoRa UART transmission:
-https://github.com/KrisKasprzak/EBYTE
