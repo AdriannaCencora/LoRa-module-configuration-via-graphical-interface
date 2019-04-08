@@ -11,10 +11,11 @@ int main(int argc, char *argv[])
       printf("failed init\n");
     }
 
-  for (;;)
-  {
-    putchar (controller.getByte());
-    fflush (stdout);
-  }
+  if (controller.readVersion()) {
+      controller.displayVersionInfo();
+    }
+
+
+
   return a.exec();
 }
