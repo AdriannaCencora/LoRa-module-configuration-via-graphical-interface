@@ -28,7 +28,7 @@ bool Controller::init()
   setMode(MODE_NORMAL);
 
   // open uart
-  if((_serialDevice = serialOpen("/dev/ttyS0", 9600)) < 0) {
+  if((_serialDevice = serialOpen("/dev/ttyAMA0", 9600)) < 0) {
           printf("failed setting uart\n");
           return false;
     }
