@@ -11,11 +11,13 @@ int main(int argc, char *argv[])
       printf("failed init\n");
     }
 
-  if (controller.readVersion()) {
-      controller.displayVersionInfo();
+  if (controller.readVersionAndModel()) {
+      controller.displayModelVersionFeature();
     }
 
-
+  if (controller.readAllParameters()) {
+      controller.displayAllParameters();
+    }
 
   return a.exec();
 }

@@ -2,6 +2,7 @@
 #define CONTROLLER_H
 
 #include <stdint.h>
+#include <QDebug>
 
 #define MODE_NORMAL 0			// can send and recieve
 #define MODE_WAKEUP 1			// sends a preamble to waken receiver
@@ -65,7 +66,7 @@
 #define OPT_FECENABLE 0b1
 
 
-//TODO: Transmission power still needs to be check.
+//TODO: Transmission power still needs to be checked (doc).
 
 class Controller
 {
@@ -74,12 +75,24 @@ public:
 
   bool init();
   void setMode(uint8_t mode);
-  void sendByte(uint8_t byte);
+//  void sendByte(uint8_t byte);
 
-  uint8_t getByte();
-  bool readVersion();
+//  uint8_t getByte();
 
-  void displayVersionInfo();
+  //consist of UART parity bit, UART baud rate and air data rate
+  void buildSpedByte();
+
+  //consist of fixed transmission enabling, IO drive mode, FEC switch and transmission power
+  void buildOptionByte();
+
+  //read present configuration parameters
+  bool readAllParameters();
+
+  //read version, model and feature
+  bool readVersionAndModel();
+
+  void displayAllParameters();
+  void displayModelVersionFeature();
 
 private:
   // pin variables
@@ -88,7 +101,7 @@ private:
   uint8_t _AUX;
 
   //file descriptor
-  int serialDevice;
+  int _serialDevice;
 
   // variable for the 6 bytes that are sent to the module to program it
   // or bytes received to indicate modules programmed settings
@@ -101,9 +114,19 @@ private:
    uint8_t _save;
    uint8_t _addressHigh;
    uint8_t _addressLow;
-   uint8_t _speed;
+   uint8_t _sped;
    uint8_t _channel;
    uint8_t _options;
+
+   // individual variables for all the options
+   uint8_t _parityBit;
+   uint8_t _UARTBaudRate;
+   uint8_t _airDataRate;
+   uint8_t _optionFixedTransmission;
+   uint8_t _optionIODriveMode;
+   uint8_t _optionWakeUpTime;
+   uint8_t _optionFEC;
+   uint8_t _optionPower;
 
    uint8_t _model;
    uint8_t _version;

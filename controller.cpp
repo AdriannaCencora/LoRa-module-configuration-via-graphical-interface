@@ -28,7 +28,7 @@ bool Controller::init()
   setMode(MODE_NORMAL);
 
   // open uart
-  if((serialDevice = serialOpen("/dev/ttyS0", 9600)) < 0) {
+  if((_serialDevice = serialOpen("/dev/ttyS0", 9600)) < 0) {
           printf("failed setting uart\n");
           return false;
     }
@@ -60,19 +60,77 @@ void Controller::setMode(uint8_t mode)
     }
 }
 
-void Controller::sendByte(uint8_t byte)
+void Controller::buildSpedByte()
 {
 
 }
 
-uint8_t Controller::getByte()
+void Controller::buildOptionByte()
 {
-  return serialGetchar(serialDevice);
+
 }
 
 
-bool Controller::readVersion()
+//TODO: Extract setting variable's values to specific functions
+bool Controller::readAllParameters()
 {
+  _parameters[0] = 0;
+  _parameters[1] = 0;
+  _parameters[2] = 0;
+  _parameters[3] = 0;
+  _parameters[4] = 0;
+  _parameters[5] = 0;
+
+  setMode(MODE_SLEEP);
+  int msg = 0xC1;
+
+  //That's not final solution, just for tests :o
+  write(_serialDevice, &msg, 1);
+  write(_serialDevice, &msg, 1);
+  write(_serialDevice, &msg, 1);
+
+  if (read(_serialDevice, _parameters, 6) == -1) {
+      qDebug() << "error while reading bytes : ";
+    }
+
+   _save = _parameters[0];
+   _addressHigh = _parameters[1];
+   _addressLow = _parameters[2];
+   _sped = _parameters[3];
+   _channel = _parameters[4];
+   _options = _parameters[5];
+
+   setMode(MODE_NORMAL);
+
+    _parityBit = (_sped & 0xC0) >> 6;
+    _UARTBaudRate = (_sped & 0x38) >> 3;
+    _airDataRate = _sped & 0x07;
+
+    _optionFixedTransmission = (_options & 0x80) >> 7;
+    _optionIODriveMode = (_options & 0x40) >> 6;
+    _optionWakeUpTime = (_options & 0x38) >> 3;
+    _optionFEC = (_options &  0x04) >> 2;
+    _optionPower = _options & 0x03;
+
+
+   if (_save != 0xC1)
+     return false;
+
+   return true;
+
+}
+
+
+//uint8_t Controller::getByte()
+//{
+//  return serialGetchar(_serialDevice);
+//}
+
+
+bool Controller::readVersionAndModel()
+{
+
+  //Unnecessary, as I think (???)
   _parameters[0] = 0;
   _parameters[1] = 0;
   _parameters[2] = 0;
@@ -81,14 +139,13 @@ bool Controller::readVersion()
   setMode(MODE_SLEEP);
   int msg = 0xC3;
 
-  //That's not final solution, just for tests :o
-  write(serialDevice, &msg, 1);
-  write(serialDevice, &msg, 1);
-  write(serialDevice, &msg, 1);
+  write(_serialDevice, &msg, 1);
+  write(_serialDevice, &msg, 1);
+  write(_serialDevice, &msg, 1);
 
 
   //Not sure if I do that correctly... :F
-  if (read(serialDevice, _parameters, 4) == -1) {
+  if (read(_serialDevice, _parameters, 4) == -1) {
       printf("error while reading bytes\n");
     }
 
@@ -104,12 +161,36 @@ bool Controller::readVersion()
   return true;
 }
 
-void Controller::displayVersionInfo()
+void Controller::displayAllParameters()
 {
-  printf("Version number is: %d\n", _version);
-  printf("Module model is: %d\n", _model);
-  printf("Other module feature: %d\n", _features);
 
+  qDebug() << "----Default parameter values: C0 00 00 1A 06 44---- ";
+  qDebug() << "0: " << hex << _save;
+  qDebug() << "1: " << hex << _addressHigh;
+  qDebug() << "2: " << hex << _addressLow;
+  qDebug() << "3: " << hex << _sped;
+  qDebug() << "4: " << hex << _channel;
+  qDebug() << "5: " << hex << _options;
+
+
+  qDebug() << "---OPTIONS---- " << _version;
+  qDebug() << "parity: " << bin << _parityBit;
+  qDebug() << "_UARTBaudRate: " << bin << _UARTBaudRate;
+  qDebug() << "_airDataRate: " << bin << _airDataRate;
+  qDebug() << "_optionFixedTransmission: " << bin << _optionFixedTransmission;
+  qDebug() << "_optionIODriveMode" << bin << _optionIODriveMode;
+  qDebug() << "_optionWakeUpTime" << bin << _optionWakeUpTime;
+  qDebug() << "_optionFEC: " << bin << _optionFEC;
+  qDebug() << "_optionPower: " << bin << _optionPower;
+
+
+}
+
+void Controller::displayModelVersionFeature()
+{
+  qDebug() << "Version number is: " << hex << _version;
+  qDebug() << "Module model is: " << hex << _model;
+  qDebug() << "Other module feature: " << hex << _features;
 }
 
 
