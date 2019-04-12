@@ -1,6 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "logic.h"
 #include <QString>
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -16,7 +18,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_openBtn_clicked()
 {
-    //TODO open port
+    if(!Logic::instance()->getController()->init())
+            QMessageBox::critical(this,tr("Error"),tr("Open port Failed"));
 }
 
 void MainWindow::on_closeBtn_clicked()
@@ -26,26 +29,46 @@ void MainWindow::on_closeBtn_clicked()
 
 void MainWindow::on_getParamBtn_clicked()
 {
-    //TODO get parameters
-    //Jakby byla przydatna wrzucam tez konwersje z stringa do Qstringa
+    //displaying parameters, first converting from hex
 
-    QString str1 = "Label1: " + QString::fromStdString("TODO") + "\n";
-    QString str2 = "Label2: " + QString::fromStdString("TODO") + "\n";
 
-    ui->paramBrowser->setText(str1+str2);
+    QString str = "Model: "+ QString::number(Logic::instance()->getController()->getModel(),16)+"\n"+
+                   "Version: " + QString::number(Logic::instance()->getController()->getVersion(),16)+ "\n"+
+                   "Features: " + QString::number(Logic::instance()->getController()->getFeatures(),16)+"\n"+
+                    "\n"+
+                    "Mode: "+ QString::number(Logic::instance()->getController()->getMode(),16)+"\n"+
+                    "Save: " + QString::number(Logic::instance()->getController()->getSave(),16)+"\n"+
+                    "AddressHigh: " + QString::number(Logic::instance()->getController()->getAdressHigh(),16)+"\n"+
+                    "AddressLow: " + QString::number(Logic::instance()->getController()->getAdressLow(),16)+"\n"+
+                    "Sped: " + QString::number(Logic::instance()->getController()->getSped(),16)+"\n"+
+                    "Channel: " + QString::number(Logic::instance()->getController()->getChannel(),16)+"\n"+
+                    "Options: " + QString::number(Logic::instance()->getController()->getOptions(),16)+"\n"+
+                    "\n"+
+                    "ParityBit: " + QString::number(Logic::instance()->getController()->getParityBit(),16)+"\n"+
+                   "UartBaudRate: " + QString::number(Logic::instance()->getController()->getUARTBaudRate(),16)+"\n"+
+                   "AirDataRate: " + QString::number(Logic::instance()->getController()->getAirDataRate(),16)+"\n"+
+                   "FixedTranmision: " + QString::number(Logic::instance()->getController()->getOptionFixedTransmission(),16)+"\n"+
+                   "IODriveMode: " + QString::number(Logic::instance()->getController()->getOptionIODriveMode(),16)+"\n"+
+                   "WakeUpTime: " + QString::number(Logic::instance()->getController()->getOptionWakeUpTime(),16)+"\n"+
+                   "FEC: " + QString::number(Logic::instance()->getController()->getOptionFEC(),16)+"\n"+
+                   "Power: " + QString::number(Logic::instance()->getController()->getOptionPower(),16)+"\n";
+
+    ui->paramBrowser->setText(str);
+
 }
 
 void MainWindow::on_setParamBtn_clicked()
 {
-    //TODO set parameters
-    //Dane tekstowe z combo boxow:
-    ui->parityBox->currentText();   //8N1, 8E1, 8O1
-    ui->baudBox->currentText();     //1200, 2400...
-    ui->airBox->currentText();      //0,3k 1,2k ...
-    ui->fecBox->currentText();      //Enable, Disable
-    ui->fixedBox->currentText();    //Enable, Disable
-    ui->worBox->currentText();      //250, 500 ...
-    //Mozna tez ui->#BOX#->currentIndex;
+    //setting parameters
+    setAirDataRate();
+    setBaudRate();
+    setFEC();
+    setWORTiming();
+    setFixMode();
+    setParityBit();
+    setMode();
+    setIO();
+    setSave();
 }
 
 void MainWindow::on_resetBtn_clicked()
@@ -55,19 +78,154 @@ void MainWindow::on_resetBtn_clicked()
 
 void MainWindow::on_exitBtn_clicked()
 {
-    //TODO exit
+    this->close();
 }
 
-void MainWindow::on_handlerTestBtn_clicked()
+void MainWindow::setParityBit()
 {
-    //Testy
+    int index = ui->parityBox->currentIndex();
+    switch(index)
+    {
+        case 0: Logic::instance()->getController()->setParityBit(PB_8N1);
+                break;
+        case 1: Logic::instance()->getController()->setParityBit(PB_8O1);
+                break;
+        case 2: Logic::instance()->getController()->setParityBit(PB_8E1);
+                break;
+    }
+}
 
-    QString str1 = "Parity: " + ui->parityBox->currentText() + " \n";
-    QString str2 = "Baud: " + ui->baudBox->currentText() + "\n";
-    QString str3 = "Air: " + ui->airBox->currentText() + " \n";
-    QString str4 = "Fec: " + ui->fecBox->currentText() + " \n";
-    QString str5 = "Fixed: " + ui->fixedBox->currentText() + " \n";
-    QString str6 = "WOR: " + ui->worBox->currentText() + " \n";
+void MainWindow::setAirDataRate()
+{
+    int index = ui->airBox->currentIndex();
+    switch(index)
+    {
+        case 0: Logic::instance()->getController()->setAirDataRate(ADR_300);
+                break;
+        case 1: Logic::instance()->getController()->setAirDataRate(ADR_1200);
+                break;
+        case 2: Logic::instance()->getController()->setAirDataRate(ADR_2400);
+                break;
+        case 3: Logic::instance()->getController()->setAirDataRate(ADR_4800);
+                break;
+        case 4: Logic::instance()->getController()->setAirDataRate(ADR_9600);
+                break;
+        case 5: Logic::instance()->getController()->setAirDataRate(ADR_19200);
+                break;
+    }
+}
 
-    ui->paramBrowser->setText(str1+str2+str3+str4+str5+str6);
+void MainWindow::setBaudRate()
+{
+    int index = ui->baudBox->currentIndex();
+    switch(index)
+    {
+        case 0: Logic::instance()->getController()->setUARTBaudRate(UDR_1200);
+                break;
+        case 1: Logic::instance()->getController()->setUARTBaudRate(UDR_2400);
+                break;
+        case 2: Logic::instance()->getController()->setUARTBaudRate(UDR_4800);
+                break;
+        case 3: Logic::instance()->getController()->setUARTBaudRate(UDR_9600);
+                break;
+        case 4: Logic::instance()->getController()->setUARTBaudRate(UDR_19200);
+                break;
+        case 5: Logic::instance()->getController()->setUARTBaudRate(UDR_38400);
+                break;
+        case 6: Logic::instance()->getController()->setUARTBaudRate(UDR_57600);
+                break;
+        case 7: Logic::instance()->getController()->setUARTBaudRate(UDR_115200);
+                break;
+    }
+}
+
+void MainWindow::setFixMode()
+{
+    int index = ui->fixedBox->currentIndex();
+    switch(index)
+    {
+        case 0: Logic::instance()->getController()->setOptionFixedTransmission(OPT_FMDISABLE);
+                break;
+        case 1: Logic::instance()->getController()->setOptionFixedTransmission(OPT_FMENABLE);
+                break;
+    }
+}
+
+void MainWindow::setFEC()
+{
+    int index = ui->fecBox->currentIndex();
+    switch(index)
+    {
+        case 0: Logic::instance()->getController()->setOptionFEC(OPT_FECDISABLE);
+                break;
+        case 1: Logic::instance()->getController()->setOptionFEC(OPT_FECENABLE);
+                break;
+
+    }
+}
+
+void MainWindow::setWORTiming()
+{
+    int index = ui->worBox->currentIndex();
+    switch(index)
+    {
+        case 0: Logic::instance()->getController()->setOptionWakeUpTime(OPT_WAKEUP250);
+                break;
+        case 1: Logic::instance()->getController()->setOptionWakeUpTime(OPT_WAKEUP500);
+                break;
+        case 2: Logic::instance()->getController()->setOptionWakeUpTime(OPT_WAKEUP750);
+                break;
+        case 3: Logic::instance()->getController()->setOptionWakeUpTime(OPT_WAKEUP1000);
+                break;
+        case 4: Logic::instance()->getController()->setOptionWakeUpTime(OPT_WAKEUP1250);
+                break;
+        case 5: Logic::instance()->getController()->setOptionWakeUpTime(OPT_WAKEUP1500);
+                break;
+        case 6: Logic::instance()->getController()->setOptionWakeUpTime(OPT_WAKEUP1750);
+                break;
+        case 7: Logic::instance()->getController()->setOptionWakeUpTime(OPT_WAKEUP2000);
+                break;
+    }
+}
+
+void MainWindow::setIO()
+{
+    int index = ui->ioBox->currentIndex();
+    switch(index)
+    {
+        case 0: Logic::instance()->getController()->setOptionIODriveMode(OPT_IOOPENDRAIN);
+                break;
+        case 1: Logic::instance()->getController()->setOptionIODriveMode(OPT_IOPUSHPULL);
+                break;
+
+    }
+}
+
+void MainWindow::setMode()
+{
+    int index = ui->modeBox->currentIndex();
+    switch(index)
+    {
+        case 0: Logic::instance()->getController()->setMode(MODE_NORMAL);
+                break;
+        case 1: Logic::instance()->getController()->setMode(MODE_WAKEUP);
+                break;
+        case 2: Logic::instance()->getController()->setMode(MODE_POWER_SAVING);
+                break;
+        case 3: Logic::instance()->getController()->setMode(MODE_SLEEP);
+                break;
+    }
+}
+
+void MainWindow::setSave()
+{
+    int index = ui->saveBox->currentIndex();
+    switch(index)
+    {
+        case 0: Logic::instance()->getController()->setSave(PERMANENT);
+                break;
+        case 1: Logic::instance()->getController()->setSave(TEMPORARY);
+                break;
+
+    }
 }

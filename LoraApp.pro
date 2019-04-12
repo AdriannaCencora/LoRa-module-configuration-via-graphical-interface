@@ -13,8 +13,14 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    controller.cpp
 
-HEADERS  += mainwindow.h
+LIBS += -lwiringPi \
+        -lcrypt
+
+HEADERS  += mainwindow.h \
+    controller.h \
+    logic.h
 
 FORMS    += mainwindow.ui

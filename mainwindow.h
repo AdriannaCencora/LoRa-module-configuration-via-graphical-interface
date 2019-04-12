@@ -28,7 +28,15 @@ private slots:
 
     void on_exitBtn_clicked();
 
-    void on_handlerTestBtn_clicked();
+    void setParityBit();
+    void setAirDataRate();
+    void setBaudRate();
+    void setFEC();
+    void setFixMode();
+    void setWORTiming();
+    void setMode();
+    void setIO();
+    void setSave();
 
 private:
     Ui::MainWindow *ui;
