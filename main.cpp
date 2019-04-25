@@ -3,7 +3,7 @@
 
 int main(int argc, char *argv[])
 {
-  QCoreApplication a(argc, argv);
+  //QCoreApplication a(argc, argv);
 
   Controller controller = Controller();
 
@@ -12,12 +12,12 @@ int main(int argc, char *argv[])
     }
 
   if (controller.readVersionAndModel()) {
-      controller.displayModelVersionFeature();
+        controller.displayModelVersionFeature();
     }
 
   if (controller.readAllParameters()) {
       controller.displayAllParameters();
     }
 
-  return a.exec();
+  //return a.exec();
 }

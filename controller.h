@@ -73,27 +73,6 @@ class Controller
 public:
   Controller(uint8_t M0_PIN = 21, uint8_t M1_PIN = 20, uint8_t AUX_PIN = 24);
 
-  bool init();
-  void setMode(uint8_t mode);
-//  void sendByte(uint8_t byte);
-
-//  uint8_t getByte();
-
-  //consist of UART parity bit, UART baud rate and air data rate
-  void buildSpedByte();
-
-  //consist of fixed transmission enabling, IO drive mode, FEC switch and transmission power
-  void buildOptionByte();
-
-  //read present configuration parameters
-  bool readAllParameters();
-
-  //read version, model and feature
-  bool readVersionAndModel();
-
-  void displayAllParameters();
-  void displayModelVersionFeature();
-
 private:
   // pin variables
   uint8_t _M0;
@@ -105,12 +84,11 @@ private:
 
   // variable for the 6 bytes that are sent to the module to program it
   // or bytes received to indicate modules programmed settings
-   uint8_t _parameters[6];
+   unsigned char _parameters[6];
 
    // individual variables for each of the 6 bytes
    // _parameters could be used as the main variable storage, but since some bytes
    // are a collection of several options, let's just make storage consistent
-   // also parameters[1] is different data depending on the _save variable
    uint8_t _save;
    uint8_t _addressHigh;
    uint8_t _addressLow;
@@ -131,6 +109,34 @@ private:
    uint8_t _model;
    uint8_t _version;
    uint8_t _features;
+
+public:
+  bool init();
+  void setMode(uint8_t mode);
+
+
+  //consist of UART parity bit, UART baud rate and air data rate
+  void buildSpedByte();
+
+  //consist of fixed transmission enabling, IO drive mode, FEC switch and transmission power
+  void buildOptionByte();
+
+  //read present configuration parameters
+  bool readAllParameters();
+
+  //read version, model and feature
+  bool readVersionAndModel();
+
+  void displayAllParameters();
+  void displayModelVersionFeature();
+
+
+   void setSave(uint8_t val){_save = val;}
+   void setAdressHigh(uint8_t val){_addressHigh = val;}
+   void setAdressLow(uint8_t val){_addressLow = val;}
+   void setSped(uint8_t val){_sped = val;}
+   void setChannel(uint8_t val){_channel = val;}
+   void setOptions(uint8_t val) {_options = val;}
 };
 
 #endif // CONTROLLER_H

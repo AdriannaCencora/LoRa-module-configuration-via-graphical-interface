@@ -26,7 +26,7 @@ bool Controller::init()
 
    // startup in mode 0(normal)
   setMode(MODE_NORMAL);
-
+    delay(100);
   // open uart
   if((_serialDevice = serialOpen("/dev/ttyAMA0", 9600)) < 0) {
           printf("failed setting uart\n");
@@ -38,6 +38,7 @@ bool Controller::init()
 
 void Controller::setMode(uint8_t mode)
 {
+  delay(40);
   switch (mode) {
     case MODE_NORMAL:
       digitalWrite(_M0, LOW);
@@ -58,6 +59,8 @@ void Controller::setMode(uint8_t mode)
     default:
       break;
     }
+
+  delay(40);
 }
 
 void Controller::buildSpedByte()
@@ -84,14 +87,16 @@ bool Controller::readAllParameters()
   setMode(MODE_SLEEP);
   int msg = 0xC1;
 
+ // serialFlush(_serialDevice);
+
   //That's not final solution, just for tests :o
   write(_serialDevice, &msg, 1);
   write(_serialDevice, &msg, 1);
   write(_serialDevice, &msg, 1);
 
-  if (read(_serialDevice, _parameters, 6) == -1) {
-      qDebug() << "error while reading bytes : ";
-    }
+  delay(10);
+
+    read(_serialDevice, _parameters, 6);
 
    _save = _parameters[0];
    _addressHigh = _parameters[1];
@@ -100,7 +105,6 @@ bool Controller::readAllParameters()
    _channel = _parameters[4];
    _options = _parameters[5];
 
-   setMode(MODE_NORMAL);
 
     _parityBit = (_sped & 0xC0) >> 6;
     _UARTBaudRate = (_sped & 0x38) >> 3;
@@ -112,9 +116,13 @@ bool Controller::readAllParameters()
     _optionFEC = (_options &  0x04) >> 2;
     _optionPower = _options & 0x03;
 
+    setMode(MODE_NORMAL);
 
-   if (_save != 0xC1)
-     return false;
+
+   if (_save != 0xC0) {
+        qDebug() <<"failed to read. not valid first byte";
+         return false;
+   }
 
    return true;
 
@@ -139,24 +147,25 @@ bool Controller::readVersionAndModel()
   setMode(MODE_SLEEP);
   int msg = 0xC3;
 
+  serialFlush(_serialDevice);
+
   write(_serialDevice, &msg, 1);
   write(_serialDevice, &msg, 1);
   write(_serialDevice, &msg, 1);
 
+ read(_serialDevice, _parameters, 4);
 
-  //Not sure if I do that correctly... :F
-  if (read(_serialDevice, _parameters, 4) == -1) {
-      printf("error while reading bytes\n");
-    }
-
+  _save = _parameters[0];
   _model = _parameters[1];
   _version =  _parameters[2];
   _features = _parameters[3];
 
   setMode(MODE_NORMAL);
 
-  if (_parameters[0] != 0xC3)
+  if (_parameters[0] != 0xC3) {
+      qDebug() <<"failed to read. not valid first byte";
     return false;
+  }
 
   return true;
 }
@@ -173,7 +182,7 @@ void Controller::displayAllParameters()
   qDebug() << "5: " << hex << _options;
 
 
-  qDebug() << "---OPTIONS---- " << _version;
+  qDebug() << "---OPTIONS----";
   qDebug() << "parity: " << bin << _parityBit;
   qDebug() << "_UARTBaudRate: " << bin << _UARTBaudRate;
   qDebug() << "_airDataRate: " << bin << _airDataRate;
@@ -188,6 +197,7 @@ void Controller::displayAllParameters()
 
 void Controller::displayModelVersionFeature()
 {
+  qDebug() << "0: " << hex << _save;
   qDebug() << "Version number is: " << hex << _version;
   qDebug() << "Module model is: " << hex << _model;
   qDebug() << "Other module feature: " << hex << _features;
