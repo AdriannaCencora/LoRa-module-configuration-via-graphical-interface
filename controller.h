@@ -92,7 +92,7 @@ private:
    uint8_t _save;
    uint8_t _addressHigh;
    uint8_t _addressLow;
-   uint8_t _sped;
+   uint8_t _speed;
    uint8_t _channel;
    uint8_t _options;
 
@@ -116,7 +116,7 @@ public:
 
 
   //consist of UART parity bit, UART baud rate and air data rate
-  void buildSpedByte();
+  void buildSpeedByte();
 
   //consist of fixed transmission enabling, IO drive mode, FEC switch and transmission power
   void buildOptionByte();
@@ -129,14 +129,37 @@ public:
 
   void displayAllParameters();
   void displayModelVersionFeature();
+     void saveParameters(uint8_t duration);
+
+    uint8_t getModel();
+    uint8_t getVersion();
+    uint8_t getFeature();
 
 
-   void setSave(uint8_t val){_save = val;}
-   void setAdressHigh(uint8_t val){_addressHigh = val;}
-   void setAdressLow(uint8_t val){_addressLow = val;}
-   void setSped(uint8_t val){_sped = val;}
-   void setChannel(uint8_t val){_channel = val;}
-   void setOptions(uint8_t val) {_options = val;}
+   uint8_t getSave();
+   uint8_t getAddressHigh();
+   uint8_t getAddressLow();
+   uint8_t getSpeed();
+   uint8_t getChannel();
+   uint8_t getOptions();
+
+   void setSave(uint8_t val);
+   void setAdressHigh(uint8_t val);
+   void setAdressLow(uint8_t val);
+   void setSpeed(uint8_t val);
+   void setChannel(uint8_t val);
+   void setOptions(uint8_t val);
+
+
+    void setParityBit(uint8_t parityBit);
+    void setUARTBaudRate(uint8_t UARTBaudRate);
+    void setAirDataRate(uint8_t airDataRate);
+    void setOptionFixedTransmission(uint8_t optionFixedTransmission);
+    void setOptionIODriveMode(uint8_t optionIODriveMode);
+    void setOptionWakeUpTime(uint8_t optionWakeUpTime);
+    void setOptionFEC(uint8_t optionFEC);
+    void setOptionPower(uint8_t optionPower);
+
 };
 
 #endif // CONTROLLER_H

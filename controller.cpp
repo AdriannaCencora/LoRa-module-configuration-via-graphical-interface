@@ -26,7 +26,9 @@ bool Controller::init()
 
    // startup in mode 0(normal)
   setMode(MODE_NORMAL);
-    delay(100);
+
+  delay(100);
+
   // open uart
   if((_serialDevice = serialOpen("/dev/ttyAMA0", 9600)) < 0) {
           printf("failed setting uart\n");
@@ -63,14 +65,84 @@ void Controller::setMode(uint8_t mode)
   delay(40);
 }
 
-void Controller::buildSpedByte()
-{
+void Controller::setSave(uint8_t val) {
+    _save = val;
+}
 
+void Controller::setAdressHigh(uint8_t val) {
+    _addressHigh = val;
+}
+
+void Controller::setAdressLow(uint8_t val) {
+    _addressLow = val;
+}
+
+void Controller::setSpeed(uint8_t val) {
+    _speed = val;
+}
+void Controller::setChannel(uint8_t val) {
+    _channel = val;
+}
+
+void Controller::setOptions(uint8_t val) {
+    _options = val;
+}
+
+
+
+
+    void Controller::setParityBit(uint8_t parityBit) {
+        _parityBit = parityBit;
+        buildSpeedByte();
+    }
+
+    void Controller::setUARTBaudRate(uint8_t UARTBaudRate) {
+        _UARTBaudRate = UARTBaudRate;
+        buildSpeedByte();
+    }
+
+    void Controller::setAirDataRate(uint8_t airDataRate) {
+        _airDataRate = airDataRate;
+        buildSpeedByte();
+    }
+
+
+    void Controller::setOptionFixedTransmission(uint8_t optionFixedTransmission) {
+        _optionFixedTransmission = optionFixedTransmission;
+        buildOptionByte();
+    }
+
+    void Controller::setOptionIODriveMode(uint8_t optionIODriveMode) {
+        _optionIODriveMode = optionIODriveMode;
+        buildOptionByte();
+    }
+
+    void Controller::setOptionWakeUpTime(uint8_t optionWakeUpTime) {
+        _optionWakeUpTime = optionWakeUpTime;
+        buildOptionByte();
+    }
+
+    void Controller::setOptionFEC(uint8_t optionFEC) {
+        _optionFEC = optionFEC;
+        buildOptionByte();
+    }
+
+    void Controller::setOptionPower(uint8_t optionPower) {
+        _optionPower = optionPower;
+        buildOptionByte();
+    }
+
+
+
+
+void Controller::buildSpeedByte()
+{
+    _speed = (_parityBit << 6) | (_UARTBaudRate << 3) | _airDataRate;
 }
 
 void Controller::buildOptionByte()
 {
-
+    _options = (_optionFixedTransmission << 7) | (_optionIODriveMode << 6) | (_optionWakeUpTime << 3) | (_optionFEC << 2) | _optionPower;
 }
 
 
@@ -98,24 +170,22 @@ bool Controller::readAllParameters()
 
     read(_serialDevice, _parameters, 6);
 
-   _save = _parameters[0];
-   _addressHigh = _parameters[1];
-   _addressLow = _parameters[2];
-   _sped = _parameters[3];
-   _channel = _parameters[4];
-   _options = _parameters[5];
+    _save = _parameters[0];
+    _addressHigh = _parameters[1];
+    _addressLow = _parameters[2];
+    _speed = _parameters[3];
+    _channel = _parameters[4];
+    _options = _parameters[5];
 
-
-    _parityBit = (_sped & 0xC0) >> 6;
-    _UARTBaudRate = (_sped & 0x38) >> 3;
-    _airDataRate = _sped & 0x07;
+    _parityBit = (_speed & 0xC0) >> 6;
+    _UARTBaudRate = (_speed & 0x38) >> 3;
+    _airDataRate = _speed & 0x07;
 
     _optionFixedTransmission = (_options & 0x80) >> 7;
     _optionIODriveMode = (_options & 0x40) >> 6;
     _optionWakeUpTime = (_options & 0x38) >> 3;
     _optionFEC = (_options &  0x04) >> 2;
     _optionPower = _options & 0x03;
-
     setMode(MODE_NORMAL);
 
 
@@ -134,6 +204,42 @@ bool Controller::readAllParameters()
 //  return serialGetchar(_serialDevice);
 //}
 
+
+uint8_t Controller::getModel() {
+    return _model;
+}
+
+uint8_t Controller::getVersion() {
+    return _version;
+}
+
+uint8_t Controller::getFeature() {
+    return _features;
+}
+
+uint8_t Controller::getSave() {
+    return _save;
+}
+
+uint8_t Controller::getAddressHigh() {
+    return _addressHigh;
+}
+
+uint8_t Controller::getAddressLow() {
+    return _addressLow;
+}
+
+uint8_t Controller::getSpeed() {
+    return _speed;
+}
+
+uint8_t Controller::getChannel() {
+    return _channel;
+}
+
+uint8_t Controller::getOptions() {
+    return _options;
+}
 
 bool Controller::readVersionAndModel()
 {
@@ -170,6 +276,22 @@ bool Controller::readVersionAndModel()
   return true;
 }
 
+void Controller::saveParameters(uint8_t duration) {
+    setMode(MODE_SLEEP);
+
+    _save = duration;
+
+    write(_serialDevice, &_save, 1);
+    write(_serialDevice, &_addressHigh, 1);
+    write(_serialDevice, &_addressLow, 1);
+    write(_serialDevice, &_speed, 1);
+    write(_serialDevice, &_channel, 1);
+    write(_serialDevice, &_options, 1);
+
+    delay(100);
+    setMode(MODE_NORMAL);
+}
+
 void Controller::displayAllParameters()
 {
 
@@ -177,7 +299,7 @@ void Controller::displayAllParameters()
   qDebug() << "0: " << hex << _save;
   qDebug() << "1: " << hex << _addressHigh;
   qDebug() << "2: " << hex << _addressLow;
-  qDebug() << "3: " << hex << _sped;
+  qDebug() << "3: " << hex << _speed;
   qDebug() << "4: " << hex << _channel;
   qDebug() << "5: " << hex << _options;
 
