@@ -112,39 +112,37 @@ private:
     uint8_t _version;
     uint8_t _features;
 
-public:
-    bool init();
-    void setMode(uint8_t mode);
-
-
     //consist of UART parity bit, UART baud rate and air data rate
     void buildSpeedByte();
 
     //consist of fixed transmission enabling, IO drive mode, FEC switch and transmission power
     void buildOptionByte();
 
+public:
+    bool init();
+    void close();
+    void setMode(uint8_t mode);
+    uint8_t getMode();
+
     //read present configuration parameters
     bool readAllParameters();
 
     //read version, model and feature
     bool readVersionAndModel();
-
-    void displayAllParameters();
-    void displayModelVersionFeature();
+    void reset();
+    //permanent or temporary
     void saveParameters(uint8_t duration);
 
     uint8_t getModel();
     uint8_t getVersion();
     uint8_t getFeature();
 
-    uint8_t getMode();
     uint8_t getSave();
     uint8_t getAddressHigh();
     uint8_t getAddressLow();
     uint8_t getSpeed();
     uint8_t getChannel();
     uint8_t getOptions();
-
 
     uint8_t getOptionFEC();
     uint8_t getParityBit();
@@ -155,14 +153,12 @@ public:
     uint8_t getOptionWakeUpTime();
     uint8_t getOptionPower();
 
-
     void setSave(uint8_t val);
     void setAdressHigh(uint8_t val);
     void setAdressLow(uint8_t val);
     void setSpeed(uint8_t val);
     void setChannel(uint8_t val);
     void setOptions(uint8_t val);
-
 
     void setParityBit(uint8_t parityBit);
     void setUARTBaudRate(uint8_t UARTBaudRate);

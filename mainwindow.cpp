@@ -24,7 +24,7 @@ void MainWindow::on_openBtn_clicked()
 
 void MainWindow::on_closeBtn_clicked()
 {
-    //TODO close port
+    Logic::instance()->getController()->close();
 }
 
 void MainWindow::on_getParamBtn_clicked()
@@ -73,7 +73,7 @@ void MainWindow::on_setParamBtn_clicked()
 
 void MainWindow::on_resetBtn_clicked()
 {
-    //TODO reset
+    Logic::instance()->getController()->reset();
 }
 
 void MainWindow::on_exitBtn_clicked()

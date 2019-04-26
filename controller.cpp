@@ -40,6 +40,10 @@ bool Controller::init()
     return true;
 }
 
+void Controller::close() {
+    serialClose(_serialDevice);
+}
+
 void Controller::setMode(uint8_t mode)
 {
     delay(40);
@@ -162,7 +166,6 @@ void Controller::buildOptionByte()
 }
 
 
-//TODO: Extract setting variable's values to specific functions
 bool Controller::readAllParameters()
 {
     _parameters[0] = 0;
@@ -174,9 +177,7 @@ bool Controller::readAllParameters()
 
     setMode(MODE_SLEEP);
     int msg = 0xC1;
-
-    // serialFlush(_serialDevice);
-
+    serialFlush(_serialDevice);
     //That's not final solution, just for tests :o
     write(_serialDevice, &msg, 1);
     write(_serialDevice, &msg, 1);
@@ -213,13 +214,6 @@ bool Controller::readAllParameters()
     return true;
 
 }
-
-
-//uint8_t Controller::getByte()
-//{
-//  return serialGetchar(_serialDevice);
-//}
-
 
 uint8_t Controller::getModel() {
     return _model;
@@ -284,8 +278,6 @@ uint8_t Controller::getOptionPower() {
 
 bool Controller::readVersionAndModel()
 {
-
-    //Unnecessary, as I think (???)
     _parameters[0] = 0;
     _parameters[1] = 0;
     _parameters[2] = 0;
@@ -317,11 +309,24 @@ bool Controller::readVersionAndModel()
     return true;
 }
 
+void Controller::reset() {
+    setMode(MODE_SLEEP);
+    int msg = 0xC4;
+
+    serialFlush(_serialDevice);
+
+    write(_serialDevice, &msg, 1);
+    write(_serialDevice, &msg, 1);
+    write(_serialDevice, &msg, 1);
+    setMode(MODE_NORMAL);
+
+}
 void Controller::saveParameters(uint8_t duration) {
     setMode(MODE_SLEEP);
 
     _save = duration;
 
+    serialFlush(_serialDevice);
     write(_serialDevice, &_save, 1);
     write(_serialDevice, &_addressHigh, 1);
     write(_serialDevice, &_addressLow, 1);
@@ -332,38 +337,3 @@ void Controller::saveParameters(uint8_t duration) {
     delay(100);
     setMode(MODE_NORMAL);
 }
-
-void Controller::displayAllParameters()
-{
-
-    qDebug() << "----Default parameter values: C0 00 00 1A 06 44---- ";
-    qDebug() << "0: " << hex << _save;
-    qDebug() << "1: " << hex << _addressHigh;
-    qDebug() << "2: " << hex << _addressLow;
-    qDebug() << "3: " << hex << _speed;
-    qDebug() << "4: " << hex << _channel;
-    qDebug() << "5: " << hex << _options;
-
-
-    qDebug() << "---OPTIONS----";
-    qDebug() << "parity: " << bin << _parityBit;
-    qDebug() << "_UARTBaudRate: " << bin << _UARTBaudRate;
-    qDebug() << "_airDataRate: " << bin << _airDataRate;
-    qDebug() << "_optionFixedTransmission: " << bin << _optionFixedTransmission;
-    qDebug() << "_optionIODriveMode" << bin << _optionIODriveMode;
-    qDebug() << "_optionWakeUpTime" << bin << _optionWakeUpTime;
-    qDebug() << "_optionFEC: " << bin << _optionFEC;
-    qDebug() << "_optionPower: " << bin << _optionPower;
-
-
-}
-
-void Controller::displayModelVersionFeature()
-{
-    qDebug() << "0: " << hex << _save;
-    qDebug() << "Version number is: " << hex << _version;
-    qDebug() << "Module model is: " << hex << _model;
-    qDebug() << "Other module feature: " << hex << _features;
-}
-
-
