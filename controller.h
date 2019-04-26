@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <QDebug>
 
+
 #define MODE_NORMAL 0			// can send and recieve
 #define MODE_WAKEUP 1			// sends a preamble to waken receiver
 #define MODE_POWER_SAVING 2		// can't transmit but receive works only in wake up mode
@@ -34,7 +35,8 @@
 // (must be the same for transmitter and reveiver)
 #define ADR_300 0b000		// 300 baud
 #define ADR_1200 0b001		// 1200 baud
-#define ADR_2400 0b010		// 2400 baud
+#define ADR_2400 0b010		// 2400 bauduint8_t Controller:: getMode()
+
 #define ADR_4800 0b011		// 4800 baud
 #define ADR_9600 0b100		// 9600 baud
 #define ADR_19200 0b101		// 19200 baud
@@ -71,66 +73,106 @@
 class Controller
 {
 public:
-  Controller(uint8_t M0_PIN = 21, uint8_t M1_PIN = 20, uint8_t AUX_PIN = 24);
-
-  bool init();
-  void setMode(uint8_t mode);
-//  void sendByte(uint8_t byte);
-
-//  uint8_t getByte();
-
-  //consist of UART parity bit, UART baud rate and air data rate
-  void buildSpedByte();
-
-  //consist of fixed transmission enabling, IO drive mode, FEC switch and transmission power
-  void buildOptionByte();
-
-  //read present configuration parameters
-  bool readAllParameters();
-
-  //read version, model and feature
-  bool readVersionAndModel();
-
-  void displayAllParameters();
-  void displayModelVersionFeature();
+    Controller(uint8_t M0_PIN = 21, uint8_t M1_PIN = 20, uint8_t AUX_PIN = 24);
 
 private:
-  // pin variables
-  uint8_t _M0;
-  uint8_t _M1;
-  uint8_t _AUX;
+    // pin variables
+    uint8_t _M0;
+    uint8_t _M1;
+    uint8_t _AUX;
 
-  //file descriptor
-  int _serialDevice;
+    //file descriptor
+    int _serialDevice;
 
-  // variable for the 6 bytes that are sent to the module to program it
-  // or bytes received to indicate modules programmed settings
-   uint8_t _parameters[6];
+    // variable for the 6 bytes that are sent to the module to program it
+    // or bytes received to indicate modules programmed settings
+    uint8_t _parameters[6];
 
-   // individual variables for each of the 6 bytes
-   // _parameters could be used as the main variable storage, but since some bytes
-   // are a collection of several options, let's just make storage consistent
-   // also parameters[1] is different data depending on the _save variable
-   uint8_t _save;
-   uint8_t _addressHigh;
-   uint8_t _addressLow;
-   uint8_t _sped;
-   uint8_t _channel;
-   uint8_t _options;
+    // individual variables for each of the 6 bytes
+    // _parameters could be used as the main variable storage, but since some bytes
+    // are a collection of several options, let's just make storage consistent
+    uint8_t _save;
+    uint8_t _addressHigh;
+    uint8_t _addressLow;
+    uint8_t _speed;
+    uint8_t _channel;
+    uint8_t _options;
 
-   // individual variables for all the options
-   uint8_t _parityBit;
-   uint8_t _UARTBaudRate;
-   uint8_t _airDataRate;
-   uint8_t _optionFixedTransmission;
-   uint8_t _optionIODriveMode;
-   uint8_t _optionWakeUpTime;
-   uint8_t _optionFEC;
-   uint8_t _optionPower;
+    // individual variables for all the options
+    uint8_t _parityBit;
+    uint8_t _UARTBaudRate;
+    uint8_t _airDataRate;
+    uint8_t _optionFixedTransmission;
+    uint8_t _optionIODriveMode;
+    uint8_t _optionWakeUpTime;
+    uint8_t _optionFEC;
+    uint8_t _optionPower;
 
-   uint8_t _model;
-   uint8_t _version;
-   uint8_t _features;
+    uint8_t _model;
+    uint8_t _version;
+    uint8_t _features;
+
+public:
+    bool init();
+    void setMode(uint8_t mode);
+
+
+    //consist of UART parity bit, UART baud rate and air data rate
+    void buildSpeedByte();
+
+    //consist of fixed transmission enabling, IO drive mode, FEC switch and transmission power
+    void buildOptionByte();
+
+    //read present configuration parameters
+    bool readAllParameters();
+
+    //read version, model and feature
+    bool readVersionAndModel();
+
+    void displayAllParameters();
+    void displayModelVersionFeature();
+    void saveParameters(uint8_t duration);
+
+    uint8_t getModel();
+    uint8_t getVersion();
+    uint8_t getFeature();
+
+    uint8_t getMode();
+    uint8_t getSave();
+    uint8_t getAddressHigh();
+    uint8_t getAddressLow();
+    uint8_t getSpeed();
+    uint8_t getChannel();
+    uint8_t getOptions();
+
+
+    uint8_t getOptionFEC();
+    uint8_t getParityBit();
+    uint8_t getUARTBaudRate();
+    uint8_t getAirDataRate();
+    uint8_t getOptionFixedTransmission();
+    uint8_t getOptionIODriveMode();
+    uint8_t getOptionWakeUpTime();
+    uint8_t getOptionPower();
+
+
+    void setSave(uint8_t val);
+    void setAdressHigh(uint8_t val);
+    void setAdressLow(uint8_t val);
+    void setSpeed(uint8_t val);
+    void setChannel(uint8_t val);
+    void setOptions(uint8_t val);
+
+
+    void setParityBit(uint8_t parityBit);
+    void setUARTBaudRate(uint8_t UARTBaudRate);
+    void setAirDataRate(uint8_t airDataRate);
+    void setOptionFixedTransmission(uint8_t optionFixedTransmission);
+    void setOptionIODriveMode(uint8_t optionIODriveMode);
+    void setOptionWakeUpTime(uint8_t optionWakeUpTime);
+    void setOptionFEC(uint8_t optionFEC);
+    void setOptionPower(uint8_t optionPower);
+
 };
 
 #endif // CONTROLLER_H
