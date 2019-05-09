@@ -17,26 +17,13 @@
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
-    MainWindow w;
-
- 
+    QApplication app(argc, argv);
+    MainWindow mainWindow;
 
     Controller controller = Controller();
 
-    Logic::instance()->setController(&controller);  // <----now we can get access to controller in other class with  Logic::instance()->getCotroller()
+    Logic::instance()->setController(&controller);
 
-    /*if(!controller.init()) {
-        printf("failed init\n");         <----  Moved to openBtn handler in mainwindow class
-    }*/
-
-  /*  if(controller.readVersionAndModel()) {
-        controller.displayModelVersionFeature();
-    }*/
-
-    /*if(controller.readAllParameters()) {
-        controller.displayAllParameters();
-    }*/
-    w.show();
-    return a.exec();
+    mainWindow.show();
+    return app.exec();
 }

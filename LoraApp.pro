@@ -21,6 +21,7 @@ LIBS += -lwiringPi \
 
 HEADERS  += mainwindow.h \
     controller.h \
-    logic.h
+    logic.h \
+    constants.h
 
 FORMS    += mainwindow.ui
