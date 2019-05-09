@@ -206,11 +206,11 @@ bool Controller::readAllParameters()
     setMode(MODE_NORMAL);
 
 
-    if (_save != 0xC0) {
-        qDebug() <<"failed to read. not valid first byte";
-        return false;
-    }
-
+//    if (_save != 0xC0) {
+//        qDebug() <<"failed to read. not valid first byte";
+//        return false;
+//    }
+//
     return true;
 
 }
@@ -301,11 +301,11 @@ bool Controller::readVersionAndModel()
 
     setMode(MODE_NORMAL);
 
-    if (_parameters[0] != 0xC3) {
-        qDebug() <<"failed to read. not valid first byte";
-        return false;
-    }
-
+//    if (_parameters[0] != 0xC3) {
+//        qDebug() <<"failed to read. not valid first byte";
+//        return false;
+//    }
+//
     return true;
 }
 

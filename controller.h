@@ -2,7 +2,7 @@
 #define CONTROLLER_H
 
 #include <stdint.h>
-#include <QDebug>
+//#include <QDebug>
 
 
 #define MODE_NORMAL 0			// can send and recieve
@@ -41,9 +41,27 @@
 #define ADR_9600 0b100		// 9600 baud
 #define ADR_19200 0b101		// 19200 baud
 
-
-//various options
-// (can be different for transmitter and reveiver)
+// CHANNEL
+// first three bits are reserved (0)
+// bits 4 ~0, channel (862MHz+CHAN * 1MHz), default 06H (868MHz)
+// 00H-1FH, correspond to 862~893MHz
+#define CHAN_0 0b0
+#define CHAN_1 0b1
+#define CHAN_2 0b10
+#define CHAN_3 0b11
+#define CHAN_4 0b100
+#define CHAN_5 0b101
+#define CHAN_6 0b110
+#define CHAN_7 0b111
+#define CHAN_8 0b1000
+#define CHAN_9 0b1001
+#define CHAN_10 0b1010
+#define CHAN_11 0b1011
+#define CHAN_12 0b1100
+#define CHAN_13 0b1101
+#define CHAN_14 0b1110
+#define CHAN_15 0b1111
+#define CHAN_16 0b11111
 
 //Fixed transmission enabling
 #define OPT_FMDISABLE 0b0
@@ -67,8 +85,11 @@
 #define OPT_FECDISABLE  0b0
 #define OPT_FECENABLE 0b1
 
-
-//TODO: Transmission power still needs to be checked (doc).
+//Transmision power
+#define OPT_TP30 0b00           // 30 db
+#define OPT_TP27 0b01           // 27 db
+#define OPT_TP24 0b10           // 24 db
+#define OPT_TP21 0b11           // 21 db
 
 class Controller
 {

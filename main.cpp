@@ -1,9 +1,11 @@
-#include <QCoreApplication>
-#include "controller.h"
-#include "logic.h"
-#include <QApplication>
+//#include <QCoreApplication>
+#include "testApp.cpp"
+#include <stdio.h>
 
-#include "mainwindow.h"
+//#include "logic.h"
+//#include <QApplication>
+
+//#include "mainwindow.h"
 /*****************************************************************************************************************************/
 /*                                                                                                                           */
 /*  I've put -lcrypt flag to the project, couldnt compile without it,I have no idea what its doing (except fixing my errors) */
@@ -17,26 +19,15 @@
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
-    MainWindow w;
+  //  QApplication a(argc, argv);
+  //  MainWindow w;
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 
- 
 
-    Controller controller = Controller();
+  //  Controller controller = Controller();
 
-    Logic::instance()->setController(&controller);  // <----now we can get access to controller in other class with  Logic::instance()->getCotroller()
-
-    /*if(!controller.init()) {
-        printf("failed init\n");         <----  Moved to openBtn handler in mainwindow class
-    }*/
-
-  /*  if(controller.readVersionAndModel()) {
-        controller.displayModelVersionFeature();
-    }*/
-
-    /*if(controller.readAllParameters()) {
-        controller.displayAllParameters();
-    }*/
-    w.show();
-    return a.exec();
+  //  Logic::instance()->setController(&controller);  // <----now we can get access to controller in other class with  Logic::instance()->getCotroller()
+   // w.show();
+   // return a.exec();
 }
