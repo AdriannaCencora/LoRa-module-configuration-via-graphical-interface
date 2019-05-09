@@ -6,334 +6,328 @@
 
 Controller::Controller(uint8_t M0_PIN, uint8_t M1_PIN, uint8_t AUX_PIN)
 {
-    _M0 = M0_PIN;
-    _M1 = M1_PIN;
-    _AUX = AUX_PIN;
+  _M0 = M0_PIN;
+  _M1 = M1_PIN;
+  _AUX = AUX_PIN;
 }
 
 bool Controller::init()
 {
-    printf("starting up modules\n");
+  printf("starting up modules\n");
 
-    if(wiringPiSetupGpio() < 0) {
-        printf("failed setting GPIO\n");
-        return 1;
+  if(wiringPiSetupGpio() < 0) {
+      printf("failed setting GPIO\n");
+      return 1;
     }
 
-    pinMode(_AUX, INPUT);
-    pinMode(_M0, OUTPUT);
-    pinMode(_M1, OUTPUT);
+  setPinModes();
+  setMode(MODE_NORMAL);
 
-    // startup in mode 0(normal)
-    setMode(MODE_NORMAL);
-
-    delay(100);
-
-    // open uart
-    if((_serialDevice = serialOpen("/dev/ttyAMA0", 9600)) < 0) {
-        printf("failed setting uart\n");
-        return false;
+  if(!openUARTConnection()) {
+      printf("Failed setting uart.\n");
+      return false;
     }
-    if(!readAllParameters()) {
-        return false;
+
+  if(!readAllParameters()) {
+      printf("Cannot read parameters.\n");
+      return false;
     }
-    return true;
+  return true;
+}
+
+bool Controller::openUARTConnection() {
+  _fileDescriptorOfDevice = serialOpen("/dev/ttyAMA0", 9600);
+  if (_fileDescriptorOfDevice < 0) {
+      return false;
+    }
+  return true;
+}
+
+void Controller::setPinModes() {
+  pinMode(_AUX, INPUT);
+  pinMode(_M0, OUTPUT);
+  pinMode(_M1, OUTPUT);
 }
 
 void Controller::close() {
-    serialClose(_serialDevice);
+  serialClose(_fileDescriptorOfDevice);
 }
 
 void Controller::setMode(uint8_t mode)
 {
-    delay(40);
-    switch (mode) {
+  delay(40);
+  switch (mode) {
     case MODE_NORMAL:
-        digitalWrite(_M0, LOW);
-        digitalWrite(_M1, LOW);
-        break;
+      digitalWrite(_M0, LOW);
+      digitalWrite(_M1, LOW);
+      break;
     case MODE_WAKEUP:
-        digitalWrite(_M0, LOW);
-        digitalWrite(_M1, HIGH);
-        break;
+      digitalWrite(_M0, LOW);
+      digitalWrite(_M1, HIGH);
+      break;
     case MODE_POWER_SAVING:
-        digitalWrite(_M0, HIGH);
-        digitalWrite(_M1, LOW);
-        break;
+      digitalWrite(_M0, HIGH);
+      digitalWrite(_M1, LOW);
+      break;
     case MODE_SLEEP:
-        digitalWrite(_M0, HIGH);
-        digitalWrite(_M1, HIGH);
-        break;
+      digitalWrite(_M0, HIGH);
+      digitalWrite(_M1, HIGH);
+      break;
     default:
-        break;
+      break;
     }
 
-    delay(40);
+  delay(40);
 }
 
 uint8_t Controller::getMode() {
-    digitalRead(_M0);
-    digitalRead(_M1);
-    if(_M0==LOW && _M1==LOW)
-        return MODE_NORMAL;
-    if(_M0==LOW && _M1==HIGH)
-        return MODE_WAKEUP;
-    if(_M0==HIGH && _M1==LOW)
-        return MODE_POWER_SAVING;
-    if(_M0==HIGH && _M1==HIGH)
-        return MODE_SLEEP;
-    return 1;         //<-be careful with that, just for testing
+  digitalRead(_M0);
+  digitalRead(_M1);
+  if(_M0==LOW && _M1==LOW)
+    return MODE_NORMAL;
+  if(_M0==LOW && _M1==HIGH)
+    return MODE_WAKEUP;
+  if(_M0==HIGH && _M1==LOW)
+    return MODE_POWER_SAVING;
+  if(_M0==HIGH && _M1==HIGH)
+    return MODE_SLEEP;
+  return 1;         //<-be careful with that, just for testing
 }
 
-void Controller::setSave(uint8_t val) {
-    _save = val;
-}
-
-void Controller::setAdressHigh(uint8_t val) {
-    _addressHigh = val;
-}
-
-void Controller::setAdressLow(uint8_t val) {
-    _addressLow = val;
-}
-
-void Controller::setSpeed(uint8_t val) {
-    _speed = val;
-}
-void Controller::setChannel(uint8_t val) {
-    _channel = val;
-}
-
-void Controller::setOptions(uint8_t val) {
-    _options = val;
-}
-
-
-
-
-void Controller::setParityBit(uint8_t parityBit) {
-    _parityBit = parityBit;
-    buildSpeedByte();
-}
-
-void Controller::setUARTBaudRate(uint8_t UARTBaudRate) {
-    _UARTBaudRate = UARTBaudRate;
-    buildSpeedByte();
-}
-
-void Controller::setAirDataRate(uint8_t airDataRate) {
-    _airDataRate = airDataRate;
-    buildSpeedByte();
-}
-
-
-void Controller::setOptionFixedTransmission(uint8_t optionFixedTransmission) {
-    _optionFixedTransmission = optionFixedTransmission;
-    buildOptionByte();
-}
-
-void Controller::setOptionIODriveMode(uint8_t optionIODriveMode) {
-    _optionIODriveMode = optionIODriveMode;
-    buildOptionByte();
-}
-
-void Controller::setOptionWakeUpTime(uint8_t optionWakeUpTime) {
-    _optionWakeUpTime = optionWakeUpTime;
-    buildOptionByte();
-}
-
-void Controller::setOptionFEC(uint8_t optionFEC) {
-    _optionFEC = optionFEC;
-    buildOptionByte();
-}
-
-void Controller::setOptionPower(uint8_t optionPower) {
-    _optionPower = optionPower;
-    buildOptionByte();
-}
-
-
-
-
-void Controller::buildSpeedByte()
+bool Controller::readVersionAndModel()
 {
-    _speed = (_parityBit << 6) | (_UARTBaudRate << 3) | _airDataRate;
+  setMode(MODE_SLEEP);
+  int msg [3] = {0xC3, 0xC3, 0xC3};
+
+  serialFlush(_fileDescriptorOfDevice);
+
+  if (write(_fileDescriptorOfDevice, &msg, 3) < 0) {
+      return false;
+    }
+
+  if (read(_fileDescriptorOfDevice, _parameters, 4) < 0) {
+      return false;
+    }
+
+  _save = _parameters[0];
+  _model = _parameters[1];
+  _version =  _parameters[2];
+  _features = _parameters[3];
+
+  setMode(MODE_NORMAL);
+
+  return true;
 }
 
-void Controller::buildOptionByte()
-{
-    _options = (_optionFixedTransmission << 7) | (_optionIODriveMode << 6) | (_optionWakeUpTime << 3) | (_optionFEC << 2) | _optionPower;
+bool Controller::reset() {
+  setMode(MODE_SLEEP);
+  int msg [3] = {0xC4, 0xC4, 0xC4};
+
+  serialFlush(_fileDescriptorOfDevice);
+
+  if (write(_fileDescriptorOfDevice, &msg, 3) < 0) {
+      return false;
+    }
+
+  setMode(MODE_NORMAL);
+
+  return true;
+}
+bool Controller::saveParameters(uint8_t saveLifeSpan) {
+  setMode(MODE_SLEEP);
+
+  _save = saveLifeSpan;
+  uint8_t parametersToBeSaved [6] = {_save, _addressHigh, _addressLow, _speed, _channel, _options };
+  serialFlush(_fileDescriptorOfDevice);
+
+  if (write(_fileDescriptorOfDevice, &parametersToBeSaved, 3) < 0) {
+      return false;
+    }
+  delay(60);
+  setMode(MODE_NORMAL);
+
+  return true;
 }
 
 
 bool Controller::readAllParameters()
 {
-    _parameters[0] = 0;
-    _parameters[1] = 0;
-    _parameters[2] = 0;
-    _parameters[3] = 0;
-    _parameters[4] = 0;
-    _parameters[5] = 0;
+  setMode(MODE_SLEEP);
 
-    setMode(MODE_SLEEP);
-    int msg = 0xC1;
-    serialFlush(_serialDevice);
-    //That's not final solution, just for tests :o
-    write(_serialDevice, &msg, 1);
-    write(_serialDevice, &msg, 1);
-    write(_serialDevice, &msg, 1);
+  int msg [3]  = {0xC1, 0xC1, 0xC1};
+  serialFlush(_fileDescriptorOfDevice);
 
-    delay(10);
+  if (write(_fileDescriptorOfDevice, &msg, 3) < 0) {
+      return false;
+    }
 
-    read(_serialDevice, _parameters, 6);
+  delay(60);
 
-    _save = _parameters[0];
-    _addressHigh = _parameters[1];
-    _addressLow = _parameters[2];
-    _speed = _parameters[3];
-    _channel = _parameters[4];
-    _options = _parameters[5];
+  if (read(_fileDescriptorOfDevice, _parameters, 6) < 0) {
+      return false;
+    }
 
-    _parityBit = (_speed & 0xC0) >> 6;
-    _UARTBaudRate = (_speed & 0x38) >> 3;
-    _airDataRate = _speed & 0x07;
+  assignReadSettingsToVariables();
 
-    _optionFixedTransmission = (_options & 0x80) >> 7;
-    _optionIODriveMode = (_options & 0x40) >> 6;
-    _optionWakeUpTime = (_options & 0x38) >> 3;
-    _optionFEC = (_options &  0x04) >> 2;
-    _optionPower = _options & 0x03;
-    setMode(MODE_NORMAL);
+  setMode(MODE_NORMAL);
 
+  return true;
+}
 
-//    if (_save != 0xC0) {
-//        qDebug() <<"failed to read. not valid first byte";
-//        return false;
-//    }
-//
-    return true;
+void Controller::assignReadSettingsToVariables() {
+
+  _save = _parameters[0];
+  _addressHigh = _parameters[1];
+  _addressLow = _parameters[2];
+  _speed = _parameters[3];
+  _channel = _parameters[4];
+  _options = _parameters[5];
+
+  _parityBit = (_speed & 0xC0) >> 6;
+  _UARTBaudRate = (_speed & 0x38) >> 3;
+  _airDataRate = _speed & 0x07;
+
+  _optionFixedTransmission = (_options & 0x80) >> 7;
+  _optionIODriveMode = (_options & 0x40) >> 6;
+  _optionWakeUpTime = (_options & 0x38) >> 3;
+  _optionFEC = (_options &  0x04) >> 2;
+  _optionPower = _options & 0x03;
 
 }
 
+void Controller::setSave(uint8_t val) {
+  _save = val;
+}
+
+void Controller::setAdressHigh(uint8_t val) {
+  _addressHigh = val;
+}
+
+void Controller::setAdressLow(uint8_t val) {
+  _addressLow = val;
+}
+
+void Controller::setSpeed(uint8_t val) {
+  _speed = val;
+}
+void Controller::setChannel(uint8_t val) {
+  _channel = val;
+}
+
+void Controller::setOptions(uint8_t val) {
+  _options = val;
+}
+
+
+void Controller::setParityBit(uint8_t parityBit) {
+  _parityBit = parityBit;
+  buildSpeedByte();
+}
+
+void Controller::setUARTBaudRate(uint8_t UARTBaudRate) {
+  _UARTBaudRate = UARTBaudRate;
+  buildSpeedByte();
+}
+
+void Controller::setAirDataRate(uint8_t airDataRate) {
+  _airDataRate = airDataRate;
+  buildSpeedByte();
+}
+
+void Controller::setOptionFixedTransmission(uint8_t optionFixedTransmission) {
+  _optionFixedTransmission = optionFixedTransmission;
+  buildOptionByte();
+}
+
+void Controller::setOptionIODriveMode(uint8_t optionIODriveMode) {
+  _optionIODriveMode = optionIODriveMode;
+  buildOptionByte();
+}
+
+void Controller::setOptionWakeUpTime(uint8_t optionWakeUpTime) {
+  _optionWakeUpTime = optionWakeUpTime;
+  buildOptionByte();
+}
+
+void Controller::setOptionFEC(uint8_t optionFEC) {
+  _optionFEC = optionFEC;
+  buildOptionByte();
+}
+
+void Controller::setOptionPower(uint8_t optionPower) {
+  _optionPower = optionPower;
+  buildOptionByte();
+}
+
+
+void Controller::buildSpeedByte()
+{
+  _speed = (_parityBit << 6) | (_UARTBaudRate << 3) | _airDataRate;
+}
+
+void Controller::buildOptionByte()
+{
+  _options = (_optionFixedTransmission << 7) | (_optionIODriveMode << 6) | (_optionWakeUpTime << 3) | (_optionFEC << 2) | _optionPower;
+}
+
+
 uint8_t Controller::getModel() {
-    return _model;
+  return _model;
 }
 
 uint8_t Controller::getVersion() {
-    return _version;
+  return _version;
 }
 
 uint8_t Controller::getFeature() {
-    return _features;
+  return _features;
 }
 
 uint8_t Controller::getSave() {
-    return _save;
+  return _save;
 }
 
 uint8_t Controller::getAddressHigh() {
-    return _addressHigh;
+  return _addressHigh;
 }
 
 uint8_t Controller::getAddressLow() {
-    return _addressLow;
+  return _addressLow;
 }
 
 uint8_t Controller::getSpeed() {
-    return _speed;
+  return _speed;
 }
 
 uint8_t Controller::getChannel() {
-    return _channel;
+  return _channel;
 }
 
 uint8_t Controller::getOptions() {
-    return _options;
+  return _options;
 }
 
 uint8_t Controller::getOptionFEC() {
-    return _optionFEC;
+  return _optionFEC;
 }
 uint8_t Controller::getParityBit() {
-    return _parityBit;
+  return _parityBit;
 }
 uint8_t Controller::getUARTBaudRate() {
-    return _UARTBaudRate;
+  return _UARTBaudRate;
 }
 uint8_t Controller::getAirDataRate() {
-    return _airDataRate;
+  return _airDataRate;
 }
 uint8_t Controller::getOptionFixedTransmission() {
-    return _optionFixedTransmission;
+  return _optionFixedTransmission;
 }
 uint8_t Controller::getOptionIODriveMode() {
-    return _optionIODriveMode; }
+  return _optionIODriveMode; }
 
 uint8_t Controller::getOptionWakeUpTime() {
-    return _optionWakeUpTime;
+  return _optionWakeUpTime;
 }
 uint8_t Controller::getOptionPower() {
-    return _optionPower;
-}
-
-bool Controller::readVersionAndModel()
-{
-    _parameters[0] = 0;
-    _parameters[1] = 0;
-    _parameters[2] = 0;
-    _parameters[3] = 0;
-
-    setMode(MODE_SLEEP);
-    int msg = 0xC3;
-
-    serialFlush(_serialDevice);
-
-    write(_serialDevice, &msg, 1);
-    write(_serialDevice, &msg, 1);
-    write(_serialDevice, &msg, 1);
-
-    read(_serialDevice, _parameters, 4);
-
-    _save = _parameters[0];
-    _model = _parameters[1];
-    _version =  _parameters[2];
-    _features = _parameters[3];
-
-    setMode(MODE_NORMAL);
-
-//    if (_parameters[0] != 0xC3) {
-//        qDebug() <<"failed to read. not valid first byte";
-//        return false;
-//    }
-//
-    return true;
-}
-
-void Controller::reset() {
-    setMode(MODE_SLEEP);
-    int msg = 0xC4;
-
-    serialFlush(_serialDevice);
-
-    write(_serialDevice, &msg, 1);
-    write(_serialDevice, &msg, 1);
-    write(_serialDevice, &msg, 1);
-    setMode(MODE_NORMAL);
-
-}
-void Controller::saveParameters(uint8_t duration) {
-    setMode(MODE_SLEEP);
-
-    _save = duration;
-
-    serialFlush(_serialDevice);
-    write(_serialDevice, &_save, 1);
-    write(_serialDevice, &_addressHigh, 1);
-    write(_serialDevice, &_addressLow, 1);
-    write(_serialDevice, &_speed, 1);
-    write(_serialDevice, &_channel, 1);
-    write(_serialDevice, &_options, 1);
-
-    delay(100);
-    setMode(MODE_NORMAL);
+  return _optionPower;
 }

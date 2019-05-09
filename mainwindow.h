@@ -37,7 +37,8 @@ private slots:
     void setMode();
     void setIO();
     void setSave();
-
+    void setPower();
+    void setChannel();
 private:
     Ui::MainWindow *ui;
 };
