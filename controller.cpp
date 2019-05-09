@@ -126,7 +126,6 @@ void Controller::setAirDataRate(uint8_t airDataRate) {
     buildSpeedByte();
 }
 
-
 void Controller::setOptionFixedTransmission(uint8_t optionFixedTransmission) {
     _optionFixedTransmission = optionFixedTransmission;
     buildOptionByte();

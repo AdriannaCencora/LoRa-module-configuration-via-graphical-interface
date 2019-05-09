@@ -227,5 +227,26 @@ void MainWindow::setSave()
         case 1: Logic::instance()->getController()->setSave(TEMPORARY);
                 break;
 
+      }
+}
+
+void MainWindow::setPower()
+{
+  int index = ui->powerBox->currentIndex();
+  switch(index)
+  {
+      case 0: Logic::instance()->getController()->setOptionPower(OPT_TP30);
+              break;
+      case 1: Logic::instance()->getController()->setOptionPower(OPT_TP27);
+              break;
+      case 2: Logic::instance()->getController()->setOptionPower(OPT_TP24);
+              break;
+      case 3: Logic::instance()->getController()->setOptionPower(OPT_TP21);
+              break;
     }
+}
+
+void MainWindow::setChannel()
+{
+
 }
