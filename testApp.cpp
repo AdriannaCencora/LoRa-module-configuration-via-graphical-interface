@@ -63,3 +63,9 @@ TEST_F(testApp, IfSetChannelToCHAN_16Expects0x1F) {
 
     EXPECT_EQ(0x1F, uut.getChannel());
 }
+
+TEST_F(testApp, IfSetSaveToTemporaryExpects0xC2) {
+    uut.setSave(TEMPORARY);
+
+    EXPECT_EQ(0xC2, uut.getSave());
+}
