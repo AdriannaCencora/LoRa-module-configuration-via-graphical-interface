@@ -97,11 +97,11 @@ uint8_t Controller::getMode() {
 bool Controller::readVersionAndModel()
 {
   setMode(MODE_SLEEP);
-  int msg [3] = {0xC3, 0xC3, 0xC3};
+  uint8_t msg [3] = {0xC3, 0xC3, 0xC3};
 
   serialFlush(_fileDescriptorOfDevice);
 
-  if (write(_fileDescriptorOfDevice, &msg, 3) < 0) {
+  if (write(_fileDescriptorOfDevice, &msg, sizeof(msg)) < 0) {
       return false;
     }
 
@@ -109,7 +109,8 @@ bool Controller::readVersionAndModel()
       return false;
     }
 
-  _save = _parameters[0];
+  serialFlush(_fileDescriptorOfDevice);
+
   _model = _parameters[1];
   _version =  _parameters[2];
   _features = _parameters[3];
@@ -121,11 +122,11 @@ bool Controller::readVersionAndModel()
 
 bool Controller::reset() {
   setMode(MODE_SLEEP);
-  int msg [3] = {0xC4, 0xC4, 0xC4};
+  uint8_t msg [3] = {0xC4, 0xC4, 0xC4};
 
   serialFlush(_fileDescriptorOfDevice);
 
-  if (write(_fileDescriptorOfDevice, &msg, 3) < 0) {
+  if (write(_fileDescriptorOfDevice, &msg, sizeof(msg)) < 0) {
       return false;
     }
 
@@ -140,7 +141,7 @@ bool Controller::saveParameters(uint8_t saveLifeSpan) {
   uint8_t parametersToBeSaved [6] = {_save, _addressHigh, _addressLow, _speed, _channel, _options };
   serialFlush(_fileDescriptorOfDevice);
 
-  if (write(_fileDescriptorOfDevice, &parametersToBeSaved, 3) < 0) {
+  if (write(_fileDescriptorOfDevice, &parametersToBeSaved, sizeof(parametersToBeSaved)) < 0) {
       return false;
     }
   delay(60);
@@ -154,10 +155,10 @@ bool Controller::readAllParameters()
 {
   setMode(MODE_SLEEP);
 
-  int msg [3]  = {0xC1, 0xC1, 0xC1};
+  uint8_t msg [3]  = {0xC1, 0xC1, 0xC1};
   serialFlush(_fileDescriptorOfDevice);
 
-  if (write(_fileDescriptorOfDevice, &msg, 3) < 0) {
+  if (write(_fileDescriptorOfDevice, &msg, sizeof(msg)) < 0) {
       return false;
     }
 

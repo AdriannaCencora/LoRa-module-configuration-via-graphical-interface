@@ -219,68 +219,72 @@ void MainWindow::setSave()
   switch(index)
     {
     case 0: Logic::instance()->getController()->setSave(PERMANENT);
-      break;
+        Logic::instance()->getController()->saveParameters(PERMANENT);
+
+        break;
     case 1: Logic::instance()->getController()->setSave(TEMPORARY);
-      break;
+          Logic::instance()->getController()->saveParameters(TEMPORARY);
 
+          break;
+
+      }
     }
-}
 
-void MainWindow::setPower()
-{
-  int index = ui->powerBox->currentIndex();
-  switch(index)
-    {
-    case 0: Logic::instance()->getController()->setOptionPower(OPT_TP30);
-      break;
-    case 1: Logic::instance()->getController()->setOptionPower(OPT_TP27);
-      break;
-    case 2: Logic::instance()->getController()->setOptionPower(OPT_TP24);
-      break;
-    case 3: Logic::instance()->getController()->setOptionPower(OPT_TP21);
-      break;
-    }
-}
+  void MainWindow::setPower()
+  {
+    int index = ui->powerBox->currentIndex();
+    switch(index)
+      {
+      case 0: Logic::instance()->getController()->setOptionPower(OPT_TP30);
+        break;
+      case 1: Logic::instance()->getController()->setOptionPower(OPT_TP27);
+        break;
+      case 2: Logic::instance()->getController()->setOptionPower(OPT_TP24);
+        break;
+      case 3: Logic::instance()->getController()->setOptionPower(OPT_TP21);
+        break;
+      }
+  }
 
-void MainWindow::setChannel()
-{
+  void MainWindow::setChannel()
+  {
 
-  int index = ui->channelBox->currentIndex();
-  switch(index)
-    {
-    case 0: Logic::instance()->getController()->setChannel(CHAN_0);
-      break;
-    case 1: Logic::instance()->getController()->setChannel(CHAN_1);
-      break;
-    case 2: Logic::instance()->getController()->setChannel(CHAN_2);
-      break;
-    case 3: Logic::instance()->getController()->setChannel(CHAN_3);
-      break;
-    case 4: Logic::instance()->getController()->setChannel(CHAN_4);
-      break;
-    case 5: Logic::instance()->getController()->setChannel(CHAN_5);
-      break;
-    case 6: Logic::instance()->getController()->setChannel(CHAN_6);
-      break;
-    case 7: Logic::instance()->getController()->setChannel(CHAN_7);
-      break;
-    case 8: Logic::instance()->getController()->setChannel(CHAN_8);
-      break;
-    case 9: Logic::instance()->getController()->setChannel(CHAN_9);
-      break;
-    case 10: Logic::instance()->getController()->setChannel(CHAN_10);
-      break;
-    case 11: Logic::instance()->getController()->setChannel(CHAN_11);
-      break;
-    case 12: Logic::instance()->getController()->setChannel(CHAN_12);
-      break;
-    case 13: Logic::instance()->getController()->setChannel(CHAN_13);
-      break;
-    case 14: Logic::instance()->getController()->setChannel(CHAN_14);
-      break;
-    case 15: Logic::instance()->getController()->setChannel(CHAN_15);
-      break;
-    case 16: Logic::instance()->getController()->setChannel(CHAN_16);
-      break;
-    }
-}
+    int index = ui->channelBox->currentIndex();
+    switch(index)
+      {
+      case 0: Logic::instance()->getController()->setChannel(CHAN_0);
+        break;
+      case 1: Logic::instance()->getController()->setChannel(CHAN_1);
+        break;
+      case 2: Logic::instance()->getController()->setChannel(CHAN_2);
+        break;
+      case 3: Logic::instance()->getController()->setChannel(CHAN_3);
+        break;
+      case 4: Logic::instance()->getController()->setChannel(CHAN_4);
+        break;
+      case 5: Logic::instance()->getController()->setChannel(CHAN_5);
+        break;
+      case 6: Logic::instance()->getController()->setChannel(CHAN_6);
+        break;
+      case 7: Logic::instance()->getController()->setChannel(CHAN_7);
+        break;
+      case 8: Logic::instance()->getController()->setChannel(CHAN_8);
+        break;
+      case 9: Logic::instance()->getController()->setChannel(CHAN_9);
+        break;
+      case 10: Logic::instance()->getController()->setChannel(CHAN_10);
+        break;
+      case 11: Logic::instance()->getController()->setChannel(CHAN_11);
+        break;
+      case 12: Logic::instance()->getController()->setChannel(CHAN_12);
+        break;
+      case 13: Logic::instance()->getController()->setChannel(CHAN_13);
+        break;
+      case 14: Logic::instance()->getController()->setChannel(CHAN_14);
+        break;
+      case 15: Logic::instance()->getController()->setChannel(CHAN_15);
+        break;
+      case 16: Logic::instance()->getController()->setChannel(CHAN_16);
+        break;
+      }
+  }
