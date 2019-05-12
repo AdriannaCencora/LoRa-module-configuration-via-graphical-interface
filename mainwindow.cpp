@@ -20,6 +20,10 @@ void MainWindow::on_openBtn_clicked()
 {
   if(!Logic::instance()->getController()->init())
     QMessageBox::critical(this,tr("Error"),tr("Open port Failed"));
+  else {
+      QString str = "Properly opened.";
+      ui->paramBrowser->setText(str);
+  }
 }
 
 void MainWindow::on_closeBtn_clicked()
@@ -29,6 +33,8 @@ void MainWindow::on_closeBtn_clicked()
 
 void MainWindow::on_getParamBtn_clicked()
 {
+    Logic::instance()->getController()->readAllParameters();
+
   QString str = "Model: "+ QString::number(Logic::instance()->getController()->getModel(),16)+"\n"+
       "Version: " + QString::number(Logic::instance()->getController()->getVersion(),16)+ "\n"+
       "Features: " + QString::number(Logic::instance()->getController()->getFeature(),16)+"\n"+
@@ -56,14 +62,21 @@ void MainWindow::on_getParamBtn_clicked()
 
 void MainWindow::on_setParamBtn_clicked()
 {
-  setAirDataRate();
-  setBaudRate();
-  setFEC();
-  setWORTiming();
-  setFixMode();
-  setParityBit();
   setMode();
+
+  setChannel();
+
+  setParityBit();
+  setBaudRate();
+  setAirDataRate();
+  setFixMode();
   setIO();
+  setWORTiming();
+  setFEC();
+  setPower();
+
+  setChannel();
+
   setSave();
 }
 

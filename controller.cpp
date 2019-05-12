@@ -28,8 +28,8 @@ bool Controller::init()
       return false;
     }
 
-  if(!readAllParameters()) {
-      printf("Cannot read parameters.\n");
+  if(!readVersionAndModel()) {
+      printf("Cannot read mode and verson.\n");
       return false;
     }
   return true;
@@ -97,19 +97,21 @@ uint8_t Controller::getMode() {
 bool Controller::readVersionAndModel()
 {
   setMode(MODE_SLEEP);
-  uint8_t msg [3] = {0xC3, 0xC3, 0xC3};
 
-  serialFlush(_fileDescriptorOfDevice);
+  uint8_t msg = 0xC3;
 
-  if (write(_fileDescriptorOfDevice, &msg, sizeof(msg)) < 0) {
-      return false;
-    }
 
-  if (read(_fileDescriptorOfDevice, _parameters, 4) < 0) {
-      return false;
-    }
+  write(_fileDescriptorOfDevice, &msg, 1);
+  write(_fileDescriptorOfDevice, &msg, 1);
+  write(_fileDescriptorOfDevice, &msg, 1);
 
-  serialFlush(_fileDescriptorOfDevice);
+
+  for (uint8_t i = 0; i < 4; i++) {
+      if (read(_fileDescriptorOfDevice, &_parameters[i], 1) < 0) {
+          return false;
+      }
+  }
+
 
   _model = _parameters[1];
   _version =  _parameters[2];
@@ -122,14 +124,11 @@ bool Controller::readVersionAndModel()
 
 bool Controller::reset() {
   setMode(MODE_SLEEP);
-  uint8_t msg [3] = {0xC4, 0xC4, 0xC4};
 
-  serialFlush(_fileDescriptorOfDevice);
-
-  if (write(_fileDescriptorOfDevice, &msg, sizeof(msg)) < 0) {
-      return false;
-    }
-
+  uint8_t msg = 0xC4;
+  write(_fileDescriptorOfDevice, &msg, 1);
+  write(_fileDescriptorOfDevice, &msg, 1);
+  write(_fileDescriptorOfDevice, &msg, 1);
   setMode(MODE_NORMAL);
 
   return true;
@@ -137,13 +136,18 @@ bool Controller::reset() {
 bool Controller::saveParameters(uint8_t saveLifeSpan) {
   setMode(MODE_SLEEP);
 
+
   _save = saveLifeSpan;
-  uint8_t parametersToBeSaved [6] = {_save, _addressHigh, _addressLow, _speed, _channel, _options };
   serialFlush(_fileDescriptorOfDevice);
 
-  if (write(_fileDescriptorOfDevice, &parametersToBeSaved, sizeof(parametersToBeSaved)) < 0) {
-      return false;
-    }
+  write(_fileDescriptorOfDevice, &_save, 1);
+  write(_fileDescriptorOfDevice, &_addressHigh, 1);
+  write(_fileDescriptorOfDevice, &_addressLow, 1);
+  write(_fileDescriptorOfDevice, &_speed, 1);
+  write(_fileDescriptorOfDevice, &_channel, 1);
+  write(_fileDescriptorOfDevice, &_options, 1);
+
+
   delay(60);
   setMode(MODE_NORMAL);
 
@@ -155,18 +159,22 @@ bool Controller::readAllParameters()
 {
   setMode(MODE_SLEEP);
 
-  uint8_t msg [3]  = {0xC1, 0xC1, 0xC1};
+  uint8_t msg  = 0xC1;
   serialFlush(_fileDescriptorOfDevice);
 
-  if (write(_fileDescriptorOfDevice, &msg, sizeof(msg)) < 0) {
-      return false;
-    }
+  write(_fileDescriptorOfDevice, &msg, 1) ;
+  write(_fileDescriptorOfDevice, &msg, 1) ;
+  write(_fileDescriptorOfDevice, &msg, 1) ;
+
 
   delay(60);
 
-  if (read(_fileDescriptorOfDevice, _parameters, 6) < 0) {
-      return false;
-    }
+  for (uint8_t i = 0; i < 6; i++) {
+      if (read(_fileDescriptorOfDevice, &_parameters[i], 1) < 0) {
+
+          return false;
+      }
+  }
 
   assignReadSettingsToVariables();
 
