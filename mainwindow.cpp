@@ -3,13 +3,28 @@
 #include "logic.h"
 #include <QString>
 #include <QMessageBox>
-
+#include "console.h"
+#include "logic_console.h"
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
-  ui(new Ui::MainWindow)
+  ui(new Ui::MainWindow),
+  console(new Console),
+  console_input(new Console)
+
 {
   ui->setupUi(this);
-}
+  ui->conOutLayout->addWidget(console);
+  ui->inputLayout->addWidget(console_input);
+
+  console->setFixedHeight(500);
+  console_input->setInputOption(true);
+  console_input->setLocalEchoEnabled(true);
+
+
+  LogicConsole::instance()->setOutput(console);
+  LogicConsole::instance()->setInput(console_input);
+  LogicConsole::instance()->getInputCon()->putData(">>");
+ }
 
 MainWindow::~MainWindow()
 {
@@ -63,9 +78,7 @@ void MainWindow::on_getParamBtn_clicked()
 void MainWindow::on_setParamBtn_clicked()
 {
   setMode();
-
   setChannel();
-
   setParityBit();
   setBaudRate();
   setAirDataRate();
@@ -74,10 +87,10 @@ void MainWindow::on_setParamBtn_clicked()
   setWORTiming();
   setFEC();
   setPower();
-
   setChannel();
-
   setSave();
+
+
 }
 
 void MainWindow::on_resetBtn_clicked()
@@ -301,3 +314,12 @@ void MainWindow::setSave()
         break;
       }
   }
+
+void MainWindow::on_inputLine_textEdited(const QString &arg1)
+{
+
+}
+
+void MainWindow::keyPressEvent(QKeyEvent *e){
+
+}

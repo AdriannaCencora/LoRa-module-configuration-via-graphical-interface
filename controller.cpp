@@ -3,6 +3,7 @@
 #include <wiringSerial.h>
 #include <stdio.h>
 #include <unistd.h>
+#include "logic_console.h"
 
 Controller::Controller(uint8_t M0_PIN, uint8_t M1_PIN, uint8_t AUX_PIN)
 {
@@ -16,7 +17,7 @@ bool Controller::init()
   printf("starting up modules\n");
 
   if(wiringPiSetupGpio() < 0) {
-      printf("failed setting GPIO\n");
+      LogicConsole::instance()->write("failed setting GPIO\n");
       return 1;
     }
 
@@ -24,12 +25,12 @@ bool Controller::init()
   setMode(MODE_NORMAL);
 
   if(!openUARTConnection()) {
-      printf("Failed setting uart.\n");
+      LogicConsole::instance()->write("Failed setting uart.\n");
       return false;
     }
 
   if(!readVersionAndModel()) {
-      printf("Cannot read mode and verson.\n");
+      LogicConsole::instance()->write("Cannot read mode and verson.\n");
       return false;
     }
   return true;
@@ -100,11 +101,12 @@ bool Controller::readVersionAndModel()
 
   uint8_t msg = 0xC3;
 
-
   write(_fileDescriptorOfDevice, &msg, 1);
   write(_fileDescriptorOfDevice, &msg, 1);
   write(_fileDescriptorOfDevice, &msg, 1);
 
+
+  LogicConsole::instance()->write(">>"+QString::number(msg,16)+QString::number(msg,16)+QString::number(msg,16));
 
   for (uint8_t i = 0; i < 4; i++) {
       if (read(_fileDescriptorOfDevice, &_parameters[i], 1) < 0) {
@@ -131,9 +133,12 @@ bool Controller::reset() {
   write(_fileDescriptorOfDevice, &msg, 1);
   setMode(MODE_NORMAL);
 
+  LogicConsole::instance()->write(">>"+QString::number(msg,16)+QString::number(msg,16)+QString::number(msg,16));
+
   return true;
 }
 bool Controller::saveParameters(uint8_t saveLifeSpan) {
+
   setMode(MODE_SLEEP);
 
 
@@ -146,6 +151,9 @@ bool Controller::saveParameters(uint8_t saveLifeSpan) {
   write(_fileDescriptorOfDevice, &_speed, 1);
   write(_fileDescriptorOfDevice, &_channel, 1);
   write(_fileDescriptorOfDevice, &_options, 1);
+
+  LogicConsole::instance()->write(">>"+QString::number(_save,16)+QString::number(_addressHigh,16)+QString::number(_addressLow,16)+
+                                  QString::number(_speed,16) + QString::number(_channel,16) + QString::number(_options,16));
 
 
   delay(60);
@@ -166,6 +174,7 @@ bool Controller::readAllParameters()
   write(_fileDescriptorOfDevice, &msg, 1) ;
   write(_fileDescriptorOfDevice, &msg, 1) ;
 
+  LogicConsole::instance()->write(">>"+QString::number(msg,16)+QString::number(msg,16)+QString::number(msg,16));
 
   delay(60);
 
@@ -175,6 +184,9 @@ bool Controller::readAllParameters()
           return false;
       }
   }
+
+  for(uint i = 0; i<6 ; i++)
+      LogicConsole::instance()->write(QString::number(_parameters[i],16)+"\n");
 
   assignReadSettingsToVariables();
 
