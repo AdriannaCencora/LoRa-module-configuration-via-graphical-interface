@@ -12,9 +12,9 @@ TARGET = LoraApp
 TEMPLATE = app
 
 
-SOURCES += main.cpp\
-        mainwindow.cpp \
-    controller.cpp
+SOURCES +=      mainwindow.cpp \
+    controller.cpp \
+    tests/controllerTest.cpp
 
 LIBS += -lwiringPi \
         -lcrypt
@@ -22,6 +22,9 @@ LIBS += -lwiringPi \
 HEADERS  += mainwindow.h \
     controller.h \
     logic.h \
-    constants.h
+    constants.h \
+    tests/controllerTest.h
 
 FORMS    += mainwindow.ui
+
+QT += testlib
