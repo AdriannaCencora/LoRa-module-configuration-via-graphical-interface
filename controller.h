@@ -61,7 +61,7 @@ private:
     uint8_t _M0;
     uint8_t _M1;
     uint8_t _AUX;
-
+    
     int _fileDescriptorOfDevice;
 
     // variable for the 6 bytes that are sent to the module to program it

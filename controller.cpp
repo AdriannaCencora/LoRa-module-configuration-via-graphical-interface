@@ -180,13 +180,12 @@ bool Controller::readAllParameters()
 
   for (uint8_t i = 0; i < 6; i++) {
       if (read(_fileDescriptorOfDevice, &_parameters[i], 1) < 0) {
-
           return false;
       }
   }
 
   for(uint i = 0; i<6 ; i++)
-      LogicConsole::instance()->write(QString::number(_parameters[i],16)+"\n");
+      LogicConsole::instance()->write(QString::number(_parameters[i],16));
 
   assignReadSettingsToVariables();
 

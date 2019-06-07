@@ -89,8 +89,6 @@ void MainWindow::on_setParamBtn_clicked()
   setPower();
   setChannel();
   setSave();
-
-
 }
 
 void MainWindow::on_resetBtn_clicked()

@@ -14,12 +14,16 @@ class LogicConsole
 
     Console *getInputCon(){return this->input;}
     void sendToOutput(){output->insertPlainText("\n"+input->toPlainText());}
+    void sendToSerial(uint8_t C1, uint8_t C2, uint8_t C3);
+
+
+
     void setInput(Console *in){input = in;}
     void setOutput(Console *out){output = out;}
     void write(QString msg){output->insertPlainText("\n"+msg);}
     QString toString(uint8_t *t, int sizeT){
         QString str;
-        for(int i = 0; i<sizeT;i++)
+        for(int i = 0; i <sizeT;i++)
             str += QString::number(t[i],16);
         return str;}
 

@@ -28,3 +28,5 @@ HEADERS  += mainwindow.h \
     logic_console.h
 
 FORMS    += mainwindow.ui
+
+CONFIG += c++11
