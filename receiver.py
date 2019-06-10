@@ -1,10 +1,9 @@
 import serial
+from configuration import *
 
-port = '/dev/ttyUSB0'
-
-ser = serial.Serial(port)
+ser = serial.Serial(receiver_port,baudrate,timeout = 1)
 
 print("Waiting for data......")
-while True
+while True:
 	reading = ser.readline().decode('utf-8')
-	print(readline)
+	print(reading)
