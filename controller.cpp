@@ -17,7 +17,7 @@ bool Controller::init()
   printf("starting up modules\n");
 
   if(wiringPiSetupGpio() < 0) {
-      LogicConsole::instance()->write("failed setting GPIO\n");
+      LogicConsole::instance()->writeToOutput("failed setting GPIO\n");
       return 1;
     }
 
@@ -25,23 +25,25 @@ bool Controller::init()
   setMode(MODE_NORMAL);
 
   if(!openUARTConnection()) {
-      LogicConsole::instance()->write("Failed setting uart.\n");
+      LogicConsole::instance()->writeToOutput("Failed setting uart.\n");
       return false;
     }
 
   if(!readVersionAndModel()) {
-      LogicConsole::instance()->write("Cannot read mode and verson.\n");
+      LogicConsole::instance()->writeToOutput("Cannot read mode and verson.\n");
       return false;
     }
   return true;
 }
 
 bool Controller::openUARTConnection() {
-  _fileDescriptorOfDevice = serialOpen("/dev/ttyAMA0", 9600);
-  if (_fileDescriptorOfDevice < 0) {
+
+    _fileDescriptorOfDevice = serialOpen("/dev/ttyAMA0", 9600);
+    if (_fileDescriptorOfDevice < 0) {
       return false;
     }
-  return true;
+
+    return true;
 }
 
 void Controller::setPinModes() {
@@ -95,18 +97,24 @@ uint8_t Controller::getMode() {
   return 1;         //<-be careful with that, just for testing
 }
 
+int Controller::getFileDescriptor()
+{
+    return this->_fileDescriptorOfDevice;
+}
+
 bool Controller::readVersionAndModel()
 {
   setMode(MODE_SLEEP);
-
   uint8_t msg = 0xC3;
 
+
+
   write(_fileDescriptorOfDevice, &msg, 1);
   write(_fileDescriptorOfDevice, &msg, 1);
   write(_fileDescriptorOfDevice, &msg, 1);
 
 
-  LogicConsole::instance()->write(">>"+QString::number(msg,16)+QString::number(msg,16)+QString::number(msg,16));
+  LogicConsole::instance()->writeToOutput(">>"+QString::number(msg,16)+QString::number(msg,16)+QString::number(msg,16));
 
   for (uint8_t i = 0; i < 4; i++) {
       if (read(_fileDescriptorOfDevice, &_parameters[i], 1) < 0) {
@@ -120,7 +128,6 @@ bool Controller::readVersionAndModel()
   _features = _parameters[3];
 
   setMode(MODE_NORMAL);
-
   return true;
 }
 
@@ -128,12 +135,13 @@ bool Controller::reset() {
   setMode(MODE_SLEEP);
 
   uint8_t msg = 0xC4;
+
   write(_fileDescriptorOfDevice, &msg, 1);
   write(_fileDescriptorOfDevice, &msg, 1);
   write(_fileDescriptorOfDevice, &msg, 1);
   setMode(MODE_NORMAL);
 
-  LogicConsole::instance()->write(">>"+QString::number(msg,16)+QString::number(msg,16)+QString::number(msg,16));
+  LogicConsole::instance()->writeToOutput(">>"+QString::number(msg,16)+QString::number(msg,16)+QString::number(msg,16));
 
   return true;
 }
@@ -152,13 +160,11 @@ bool Controller::saveParameters(uint8_t saveLifeSpan) {
   write(_fileDescriptorOfDevice, &_channel, 1);
   write(_fileDescriptorOfDevice, &_options, 1);
 
-  LogicConsole::instance()->write(">>"+QString::number(_save,16)+QString::number(_addressHigh,16)+QString::number(_addressLow,16)+
+  LogicConsole::instance()->writeToOutput(">>"+QString::number(_save,16)+QString::number(_addressHigh,16)+QString::number(_addressLow,16)+
                                   QString::number(_speed,16) + QString::number(_channel,16) + QString::number(_options,16));
-
 
   delay(60);
   setMode(MODE_NORMAL);
-
   return true;
 }
 
@@ -174,7 +180,7 @@ bool Controller::readAllParameters()
   write(_fileDescriptorOfDevice, &msg, 1) ;
   write(_fileDescriptorOfDevice, &msg, 1) ;
 
-  LogicConsole::instance()->write(">>"+QString::number(msg,16)+QString::number(msg,16)+QString::number(msg,16));
+  LogicConsole::instance()->writeToOutput(">>"+QString::number(msg,16)+QString::number(msg,16)+QString::number(msg,16));
 
   delay(60);
 
@@ -185,7 +191,7 @@ bool Controller::readAllParameters()
   }
 
   for(uint i = 0; i<6 ; i++)
-      LogicConsole::instance()->write(QString::number(_parameters[i],16));
+      LogicConsole::instance()->writeToOutput(QString::number(_parameters[i],16));
 
   assignReadSettingsToVariables();
 
@@ -351,3 +357,4 @@ uint8_t Controller::getOptionWakeUpTime() {
 uint8_t Controller::getOptionPower() {
   return _optionPower;
 }
+

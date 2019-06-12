@@ -4,7 +4,9 @@
 #include <QString>
 #include <QMessageBox>
 #include "console.h"
+#include <QTextStream>
 #include "logic_console.h"
+
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
   ui(new Ui::MainWindow),
@@ -33,8 +35,9 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_openBtn_clicked()
 {
+
   if(!Logic::instance()->getController()->init())
-    QMessageBox::critical(this,tr("Error"),tr("Open port Failed"));
+        QMessageBox::critical(this,tr("Error"),tr("Open port Failed"));
   else {
       QString str = "Properly opened.";
       ui->paramBrowser->setText(str);
@@ -313,11 +316,4 @@ void MainWindow::setSave()
       }
   }
 
-void MainWindow::on_inputLine_textEdited(const QString &arg1)
-{
 
-}
-
-void MainWindow::keyPressEvent(QKeyEvent *e){
-
-}

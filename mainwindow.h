@@ -19,7 +19,6 @@ public:
 
 private slots:
 
-    void keyPressEvent(QKeyEvent *e) override;
 
     void on_openBtn_clicked();
     void on_closeBtn_clicked();
@@ -38,7 +37,6 @@ private slots:
     void setSave();
     void setPower();
     void setChannel();
-    void on_inputLine_textEdited(const QString &arg1);
 
 private:
 
@@ -49,3 +47,4 @@ private:
 };
 
 #endif // MAINWINDOW_H
+

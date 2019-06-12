@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <QDebug>
 
+
 class Controller
 {
 public:
@@ -40,6 +41,8 @@ public:
     uint8_t getOptionWakeUpTime();
     uint8_t getOptionPower();
 
+    int getFileDescriptor();
+
     void setSave(uint8_t val);
     void setAdressHigh(uint8_t val);
     void setAdressLow(uint8_t val);
@@ -57,7 +60,10 @@ public:
     void setOptionPower(uint8_t optionPower);
 
 private:
+
     // pin variables
+
+
     uint8_t _M0;
     uint8_t _M1;
     uint8_t _AUX;
@@ -101,3 +107,4 @@ private:
 };
 
 #endif // CONTROLLER_H
+

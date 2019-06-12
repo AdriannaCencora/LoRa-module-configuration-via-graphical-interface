@@ -3,7 +3,7 @@
 #define LOGIC_H
 
 #include "controller.h"
-
+#include <unistd.h>
 //class to passing controller object to gui
 
 class Logic
